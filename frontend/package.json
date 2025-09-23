@@ -55,12 +55,14 @@
     "tailwind-merge": "^3.2.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
+    "serve": "^14.2.3",
     "zod": "^3.24.4"
   },
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "test": "craco test"
+    "test": "craco test",
+    "serve": "serve -s build -l $PORT"
   },
   "browserslist": {
     "production": [
