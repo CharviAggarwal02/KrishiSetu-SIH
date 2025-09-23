@@ -26,9 +26,12 @@ services:
     env: static
     region: oregon
     plan: free
-    buildCommand: cd frontend && yarn install --frozen-lockfile || npm ci && yarn build || npm run build
+    buildCommand: cd frontend && (yarn install --frozen-lockfile || npm ci) && (yarn build || npm run build)
     staticPublishPath: frontend/build
     autoDeploy: true
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        value: https://krishisetu-sih.onrender.com
     headers:
       - path: "/*"
         name: "Cache-Control"
