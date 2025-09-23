@@ -54,14 +54,12 @@ import {
   Cell
 } from 'recharts';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-axios.post(`${BACKEND_URL}/auth/login`, data);
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 const API = `${BACKEND_URL}/api`;
-;
 
 // Debug logging
-console.log('BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
-console.log('API:', `${process.env.REACT_APP_BACKEND_URL}/api`);
+console.log('BACKEND_URL:', BACKEND_URL);
+console.log('API:', API);
 
 // Auth Context
 const AuthContext = React.createContext();
@@ -184,7 +182,7 @@ const LoginForm = () => {
             <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-green-600 to-yellow-600 rounded-full flex items-center justify-center">
               <Sprout className="w-8 h-8 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-green-800">HarvestGuru</CardTitle>
+            <CardTitle className="text-2xl font-bold text-green-800">KrishiSetu</CardTitle>
             <CardDescription className="text-green-600">
               AI-powered Crop Yield Prediction for Indian Farmers
             </CardDescription>
@@ -282,7 +280,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
               <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-yellow-600 rounded-lg flex items-center justify-center">
                 <Sprout className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-green-800">HarvestGuru</span>
+              <span className="text-xl font-bold text-green-800">KrishiSetu</span>
             </div>
             <nav className="hidden md:flex space-x-8">
               {navItems.map((item) => {
@@ -1500,7 +1498,7 @@ const MainApp = () => {
           <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
             <Sprout className="w-8 h-8 text-white" />
           </div>
-          <p className="text-green-800 font-medium">Loading HarvestGuru...</p>
+          <p className="text-green-800 font-medium">Loading KrishiSetu...</p>
         </div>
       </div>
     );
