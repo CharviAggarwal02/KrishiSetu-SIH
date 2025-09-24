@@ -49,7 +49,7 @@ class Token(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "HarvestGuru API is running"}
+    return {"message": "HarvestGuru API is running", "status": "deployed"}
 
 @app.get("/api")
 async def api_root():
