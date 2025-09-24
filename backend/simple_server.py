@@ -49,7 +49,7 @@ class Token(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "HarvestGuru API is running", "status": "deployed"}
+    return {"message": "HarvestGuru API is running", "status": "deployed", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 @app.get("/api")
 async def api_root():
@@ -57,7 +57,11 @@ async def api_root():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
+
+@app.get("/test")
+async def test():
+    return {"message": "Test endpoint working", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 # Authentication endpoints
 @app.post("/api/auth/register", response_model=Token)
