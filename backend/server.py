@@ -22,7 +22,6 @@ import uvicorn
 
 
 app=FastAPI()
-app.include_router(auth_router, prefix="/api/auth")
 
 # ------------------- Load env -------------------
 ROOT_DIR = Path(__file__).parent
@@ -35,7 +34,7 @@ db = client[os.environ['DB_NAME']]
 
 # ------------------- App & Router -------------------
 app = FastAPI(title="HarvestGuru API")
-router = APIRouter()  # No prefix
+router = APIRouter(prefix="/api")  # Add /api prefix to all routes
 
 # ------------------- Security -------------------
 security = HTTPBearer()
@@ -199,6 +198,104 @@ async def login(user_credentials: UserLogin):
 @router.get("/auth/me", response_model=User)
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+# ------------------- Additional Routes -------------------
+@router.get("/states")
+async def get_states():
+    return {"states": ["Andhra Pradesh", "Assam", "Bihar", "Chhattisgarh", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Goa", "Jammu and Kashmir", "Ladakh", "Puducherry", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Lakshadweep", "Andaman and Nicobar Islands"]}
+
+@router.get("/districts/{state}")
+async def get_districts(state: str):
+    # Sample districts for a few states
+    districts_map = {
+        "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Nellore", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari", "YSR Kadapa"],
+        "Assam": ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Dima Hasao", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup", "Kamrup Metropolitan", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Sivasagar", "Sonitpur", "South Salmara-Mankachar", "Tinsukia", "Udalguri", "West Karbi Anglong"],
+        "Bihar": ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+        "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udaipur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+        "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rewari", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+        "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davangere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+        "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+        "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+        "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "Sahibzada Ajit Singh Nagar", "Sangrur", "Shahid Bhagat Singh Nagar", "Tarn Taran"],
+        "Rajasthan": ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karauli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"],
+        "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kancheepuram", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+        "Uttar Pradesh": ["Agra", "Aligarh", "Allahabad", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Ayodhya", "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Prayagraj", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+        "West Bengal": ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Dakshin Dinajpur", "Darjeeling", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "Paschim Bardhaman", "Paschim Medinipur", "Purba Bardhaman", "Purba Medinipur", "Purulia", "South 24 Parganas", "Uttar Dinajpur"]
+    }
+    return {"districts": districts_map.get(state, ["District 1", "District 2", "District 3"])}
+
+@router.get("/crops")
+async def get_crops():
+    return {"crops": ["Rice", "Wheat", "Maize", "Cotton", "Sugarcane", "Soybean", "Groundnut", "Rapeseed", "Sunflower", "Sesame", "Jute", "Tea", "Coffee", "Rubber", "Coconut", "Banana", "Mango", "Grapes", "Potato", "Onion", "Tomato", "Chilli", "Turmeric", "Ginger", "Black Pepper", "Cardamom", "Cinnamon", "Cloves", "Nutmeg", "Vanilla"]}
+
+@router.get("/soil-types")
+async def get_soil_types():
+    return {"soilTypes": [
+        {"name": "Alluvial", "description": "Rich in nutrients, good for most crops"},
+        {"name": "Black", "description": "High clay content, good water retention"},
+        {"name": "Red", "description": "Well-drained, suitable for many crops"},
+        {"name": "Laterite", "description": "Low fertility, needs organic matter"},
+        {"name": "Mountain", "description": "Variable composition, good for specific crops"},
+        {"name": "Desert", "description": "Sandy, low organic matter"},
+        {"name": "Peaty", "description": "High organic content, good for vegetables"},
+        {"name": "Clay", "description": "Heavy soil, good water retention"},
+        {"name": "Sandy", "description": "Well-drained, needs frequent irrigation"},
+        {"name": "Loamy", "description": "Ideal soil type, balanced properties"}
+    ]}
+
+@router.get("/my-predictions")
+async def get_my_predictions(current_user: User = Depends(get_current_user)):
+    predictions = await db.predictions.find({"user_id": current_user.id}).to_list(100)
+    return {"predictions": predictions}
+
+@router.get("/weather/{lat}/{lon}")
+async def get_weather(lat: float, lon: float):
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}&units=metric"
+            )
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "temperature": data["main"]["temp"],
+                    "humidity": data["main"]["humidity"],
+                    "description": data["weather"][0]["description"],
+                    "rainfall": data.get("rain", {}).get("1h", 0)
+                }
+    except Exception as e:
+        logging.error(f"Weather API error: {e}")
+    
+    # Return mock data if API fails
+    return {
+        "temperature": 28.5,
+        "humidity": 65,
+        "description": "partly cloudy",
+        "rainfall": 2.5
+    }
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat_with_assistant(chat_message: ChatMessage, current_user: User = Depends(get_current_user)):
+    # Mock AI response
+    responses = {
+        "en": "Based on your farming conditions, I recommend regular irrigation and proper fertilization. Monitor soil moisture levels and adjust watering accordingly.",
+        "hi": "आपकी खेती की स्थिति के आधार पर, मैं नियमित सिंचाई और उचित उर्वरक की सिफारिश करता हूं। मिट्टी की नमी के स्तर की निगरानी करें और पानी को तदनुसार समायोजित करें।",
+        "bn": "আপনার চাষের অবস্থার ভিত্তিতে, আমি নিয়মিত সেচ এবং সঠিক সার প্রয়োগের পরামর্শ দিই। মাটির আর্দ্রতার মাত্রা পর্যবেক্ষণ করুন এবং জল দেওয়া তদনুসারে সামঞ্জস্য করুন।",
+        "or": "ଆପଣଙ୍କ କୃଷି ଅବସ୍ଥା ଅନୁଯାୟୀ, ମୁଁ ନିୟମିତ ଜଳସେଚନ ଏବଂ ଉପଯୁକ୍ତ ସାର ବ୍ୟବହାରର ସୁପାରିଶ କରୁଛି। ମାଟିର ଆର୍ଦ୍ରତା ସ୍ତର ନିରୀକ୍ଷଣ କରନ୍ତୁ ଏବଂ ଜଳ ଦେବା ତଦନୁସାରେ ସମନ୍ୱୟ କରନ୍ତୁ।"
+    }
+    
+    recommendations = [
+        "Monitor soil moisture regularly",
+        "Apply organic fertilizers",
+        "Check for pest infestations",
+        "Maintain proper irrigation schedule"
+    ]
+    
+    return ChatResponse(
+        response=responses.get(chat_message.language, responses["en"]),
+        language=chat_message.language,
+        recommendations=recommendations
+    )
 
 # ------------------- Crop Prediction -------------------
 @router.post("/predict-yield", response_model=CropPredictionResponse)

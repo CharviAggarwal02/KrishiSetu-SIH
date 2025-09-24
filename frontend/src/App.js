@@ -55,7 +55,7 @@ import {
 } from 'recharts';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
-const API = `${BACKEND_URL}/api`;
+const API = `${BACKEND_URL.replace(/\/$/, '')}/api`;
 
 // Debug logging
 console.log('BACKEND_URL:', BACKEND_URL);
