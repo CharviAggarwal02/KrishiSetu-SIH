@@ -67,6 +67,10 @@ async def test():
 async def test_register():
     return {"message": "Registration endpoint is accessible", "status": "ok"}
 
+@app.post("/api/simple-test")
+async def simple_test():
+    return {"message": "Simple POST test", "status": "working"}
+
 # Authentication endpoints
 @app.post("/api/auth/register", response_model=Token)
 async def register(user_data: UserRegister):
