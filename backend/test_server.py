@@ -7,6 +7,10 @@ app = FastAPI(title="Test API")
 async def root():
     return {"message": "Test API is working", "status": "success"}
 
+@app.get("/home")
+async def home():
+    return {"message": "Home endpoint working", "status": "success"}
+
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
