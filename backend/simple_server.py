@@ -5,13 +5,18 @@ from typing import Optional
 import uvicorn
 import uuid
 from datetime import datetime, timezone
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="HarvestGuru API")
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*", "https://krishisetu-frontend.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,6 +51,10 @@ class Token(BaseModel):
 async def root():
     return {"message": "HarvestGuru API is running"}
 
+@app.get("/api")
+async def api_root():
+    return {"message": "HarvestGuru API is running", "version": "1.0.0"}
+
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
@@ -53,26 +62,34 @@ async def health():
 # Authentication endpoints
 @app.post("/api/auth/register", response_model=Token)
 async def register(user_data: UserRegister):
-    if user_data.email in fake_users_db:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    # Create user
-    user_id = str(uuid.uuid4())
-    user = {
-        "id": user_id,
-        "email": user_data.email,
-        "name": user_data.name,
-        "phone": user_data.phone,
-        "password": user_data.password,  # In real app, hash this
-        "created_at": datetime.now(timezone.utc)
-    }
-    
-    fake_users_db[user_data.email] = user
-    
-    # Generate a simple token (in real app, use JWT)
-    token = f"demo_token_{user_id}"
-    
-    return {"access_token": token, "token_type": "bearer"}
+    try:
+        logger.info(f"Registration attempt for email: {user_data.email}")
+        
+        if user_data.email in fake_users_db:
+            logger.warning(f"Email already registered: {user_data.email}")
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        # Create user
+        user_id = str(uuid.uuid4())
+        user = {
+            "id": user_id,
+            "email": user_data.email,
+            "name": user_data.name,
+            "phone": user_data.phone,
+            "password": user_data.password,  # In real app, hash this
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        fake_users_db[user_data.email] = user
+        logger.info(f"User registered successfully: {user_data.email}")
+        
+        # Generate a simple token (in real app, use JWT)
+        token = f"demo_token_{user_id}"
+        
+        return {"access_token": token, "token_type": "bearer"}
+    except Exception as e:
+        logger.error(f"Registration error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 @app.post("/api/auth/login", response_model=Token)
 async def login(user_credentials: UserLogin):
