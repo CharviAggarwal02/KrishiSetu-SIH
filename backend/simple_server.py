@@ -63,6 +63,10 @@ async def health():
 async def test():
     return {"message": "Test endpoint working", "timestamp": datetime.now(timezone.utc).isoformat()}
 
+@app.post("/api/test-register")
+async def test_register():
+    return {"message": "Registration endpoint is accessible", "status": "ok"}
+
 # Authentication endpoints
 @app.post("/api/auth/register", response_model=Token)
 async def register(user_data: UserRegister):
@@ -91,9 +95,11 @@ async def register(user_data: UserRegister):
         token = f"demo_token_{user_id}"
         
         return {"access_token": token, "token_type": "bearer"}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Registration error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Registration failed")
 
 @app.post("/api/auth/login", response_model=Token)
 async def login(user_credentials: UserLogin):
