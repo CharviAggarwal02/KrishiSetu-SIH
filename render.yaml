@@ -6,7 +6,7 @@ services:
     region: oregon
     plan: free
     buildCommand: pip install -r requirements-simple.txt
-    startCommand: uvicorn simple_server:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn test_server:app --host 0.0.0.0 --port $PORT
     autoDeploy: true
     envVars:
       - key: PYTHON_VERSION
